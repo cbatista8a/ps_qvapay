@@ -52,6 +52,13 @@ class QvapayValidationModuleFrontController extends ModuleFrontController
 	    if (!$cart->id || $cart->id_customer != $customer_id){
 		    die(json_encode(['response' => 'error','message' => 'Invalid remote_id']));
 	    }
+	    $order = Order::getByCartId($cart->id);
+	    if ($order != null && $order->hasBeenPaid()){
+		    $error = $this->trans('Cart cannot be loaded or an order has already been placed using this cart', array(), 'Admin.Payment.Notification');
+		    PrestaShopLogger::addLog($error, 4, '0000001', 'Cart', (int) ($this->context->cart->id));
+		    $html = '<br/><a href="'.$this->context->link->getBaseLink().'">Go Home</a>';
+			die($error.$html);
+	    }
 	    $amount = $cart->getOrderTotal();
         /*
          * Restore the context from the $cart_id & the $customer_id to process the validation properly.
@@ -116,7 +123,7 @@ class QvapayValidationModuleFrontController extends ModuleFrontController
 	 */
 	public function transactionIsset($amount,$remote_id, $transactions){
 	    foreach ($transactions as $transaction) {
-	    	if ($transaction['amount'] == $amount && $transaction['remote_id'] == $remote_id){
+	    	if ($transaction->amount == $amount && $transaction->remote_id == $remote_id){
 	    		return true;
 		    }
     	}
