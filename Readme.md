@@ -1,8 +1,8 @@
 # QvaPay
 
-##Payment Module for PrestaShop
+## Payment Module for PrestaShop
 
-###Required Fields
+### Required Fields
 ##### `app_id`
 ##### `app_secret`
 
